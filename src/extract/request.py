@@ -23,5 +23,5 @@ def get_wikipedia_image(name):
 
 
 # Example
-fighter_name = "Anthony Joshua"
+fighter_name = "Tyson Fury"
 print(get_wikipedia_image(fighter_name))
