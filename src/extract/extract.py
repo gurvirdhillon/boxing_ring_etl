@@ -1,50 +1,45 @@
 import pandas as pd
 import os
+from typing import Optional
+from src.utils.logging_utils import setup_logger
 
-folder_name = "../../data/raw/"
-file_name = "boxing_matches_messy_data.csv"
+logger = setup_logger("EXTRACT")
 
-
-def check_file_exists(file_path=f"{folder_name}{file_name}") -> bool:
-    if os.path.exists(file_path):
-        print("File path found!")
-        return True
-    else:
-        print("File does not exist")
-        return False
+def get_file_path(file_name: str) -> str:
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    return os.path.join(base_dir, "data", "raw", file_name)
 
 
-def extract_filepath(file_path):
-    if not check_file_exists(file_path):
-        return "file doesnt exist"
-    else:
-        return filepath
+def file_exists(file_path: str) -> bool:
+    """Only check existence — no prints here."""
+    return os.path.exists(file_path)
 
 
-def extract_data(file_path=f"{folder_name}{file_name}") -> pd.DataFrame:
+def extract_data(file_name = "boxing_matches_messy_data.csv") -> Optional[pd.DataFrame]:
+    """Extract CSV into DataFrame safely using full path."""
+    file_path = get_file_path(file_name)
+
+    if not file_exists(file_path):
+        print(f"File not found at: {file_path}")
+        return None
+
     try:
         df = pd.read_csv(file_path)
-        print("Data successfully loaded")
+        print(f"Data successfully loaded from: {file_path}")
         return df
-    except FileNotFoundError:
-        print("File not found")
+
     except Exception as e:
-        print("Error occurred", e)
+        print(f"⚠ Error during loading: {e}")
+        return e
 
 
 if __name__ == "__main__":
-    req = check_file_exists()
-    file
-    if req == True:
-        df = extract_data()
+    df = extract_data()
+    if df is not None:
+        print("\n🔹 Preview of data in the extraction process:")
         print(df.head())
-        print("-" * 50)
-        print("shape:", df.shape)
-        print("-" * 50)
-        print(df.isnull().sum())
-        print("-" * 50)
-        print("duplicated data:", df.duplicated().sum())
-        print("Data extracted")
+        print(df.shape)
+
 
 """
 being in the extract folder and running 

@@ -13,7 +13,8 @@ def _ensure_log_directory(base_path=None):
 def _create_formatter():
     """Create a standard log formatter."""
     return logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt="%Y-%m-%d %H:%M:%S"
     )
 
 
@@ -32,7 +33,7 @@ def _create_handlers(log_directory, log_file, level):
     return file_handler, console_handler
 
 
-def setup_logger(name, log_file, level=logging.DEBUG, base_path=None):
+def setup_logger(name, log_file="etl_pipeline.log", level=logging.INFO, base_path=None):
     """Function to setup a logger; can be used in multiple modules."""
     log_directory = _ensure_log_directory(base_path)
     
