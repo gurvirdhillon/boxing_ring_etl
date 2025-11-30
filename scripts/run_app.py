@@ -7,11 +7,11 @@ from config.env_config import setup_env
 from src.extract.extract import extract_data
 from src.utils.logging_utils import setup_logger
 
-logger = setup_logger("RUN_ETL")
+logger = setup_logger("RUN_APP")
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python run_etl.py <dev|test|prod>")
+        print("Usage: python run_app.py <dev|test|prod>")
         sys.exit(1)
     env = sys.argv[1]
     setup_env(env)

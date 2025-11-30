@@ -36,7 +36,7 @@ def extract_data(file_name = "boxing_matches_messy_data.csv") -> Optional[pd.Dat
 if __name__ == "__main__":
     df = extract_data()
     if df is not None:
-        print("\n🔹 Preview of data in the extraction process:")
+        print("Preview of data in the extraction process:")
         print(df.head())
         print(df.shape)
 
