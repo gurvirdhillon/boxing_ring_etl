@@ -8,34 +8,24 @@ st.title("Boxer Profile:")
 df = pd.read_csv('../../data/processed/final_processed_data/boxing-match-fighters.csv')
 
 def get_wikipedia_image(name):
-    base_title = name.replace(' ', '_')
-
-    # 1️⃣ Try standard summary API (fast, lightweight)
-    url_summary = f"https://en.wikipedia.org/api/rest_v1/page/summary/{base_title}"
-    headers = {"User-Agent": "BoxingETL/1.0 (mailto:gurvirsingdhillon@outlook.com)"}
+    url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{name.replace(' ', '_')}"
     
-    response = requests.get(url_summary, headers=headers)
+    headers = {
+        "User-Agent": "BoxingETL/1.0 (mailto:gurvirsingdhillon@outlook.com)"
+    }
 
-    if response.status_code == 200:
-        data = response.json()
-        if "thumbnail" in data:
-            return data["thumbnail"]["source"]
+    response = requests.get(url, headers=headers)
 
-    # 2️⃣ If no summary thumbnail → Try full Media/Images API
-    url_image = (
-        f"https://en.wikipedia.org/w/api.php?action=query&titles={base_title}"
-        "&prop=pageimages&format=json&pithumbsize=500"
-    )
-    response = requests.get(url_image, headers=headers)
+    if response.status_code != 200:
+        print(f"Failed to fetch data for {name}")
+        return None
 
-    if response.status_code == 200:
-        pages = response.json()["query"]["pages"]
-        for _, page in pages.items():
-            if "thumbnail" in page:
-                return page["thumbnail"]["source"]
+    data = response.json()
 
-    return None
-
+    if "thumbnail" in data:
+        return data["thumbnail"]["source"]
+    else:
+        return None
 
 fighters_reunite = pd.concat([df['Boxer_A'], df['Boxer_B']], axis=0)
 fighters_reunite = fighters_reunite.dropna().drop_duplicates().sort_values().tolist()
