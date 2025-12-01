@@ -9,7 +9,7 @@ This project combined two datasets into the ETL pipeline. The project aims to co
 
 Prerequisite:  
 
-- Python version 3+ available at the <a href="https://www.python.org/downloads/">python website.</href>
+- Python version 3+ available at the <a href="https://www.python.org/downloads/">python website.</A>
 - Pip installation
 - Git(to clone the repository)
 
@@ -107,8 +107,6 @@ MoSCoW prioritisation had become very effective within the core functionality of
     <td>Would as this would require machine learning and the use of Scikit-learn. Given the time frame this may not be viable therefore has not been put as a priority. But will be considered a future work.</td>
     <td><input type="checkbox"><td>
   </tr>
-  <tr>
-
 </table>
 
 #### Kanban
@@ -118,6 +116,10 @@ A Github Kanban-board was utilised for understanding the current project backlog
 <img src="appendices/kanban.png" alt="" title="appendix1" id="appendix1">
 
 Moreover, kanban was integrated with github issues which played a fundamental role with tracking states of issues and where in the process of completion it currently lies.
+
+#### Project timeline
+
+
 
 ### The rules of boxing
 
@@ -181,3 +183,28 @@ Class is an attribute linked to "weight". To fight an opponent one must fit the 
 
 
 
+
+### Further discussion
+
+<table>
+  <tr>
+    <th>Subject</th>
+    <th>Description</th>
+    <th>Link</th>
+  </tr>
+  <tr>
+    <td>AWS Service Integration plan</td>
+    <td>As AWS is a scalable resource the markdown provided would allow me to plan how I would shift over this ETL project to the cloud. The markdown provides the reasons why this may be of benefit as well as the potential way this would be completed.</td>
+    <td><a href="docs/AWS.md">AWS Documentation</a></td>
+  </tr>
+  <tr>
+    <td>Boxing dataset location</td>
+    <td>Reference: Kaggle Dataset. This dataset was open source and was extracted as a csv file.</td>
+    <td><a href="https://www.kaggle.com/datasets/iyadelwy/boxing-matches-dataset-predict-winner/data">Boxer Dataset</a></td>
+  </tr>
+  <tr>
+    <td>Fixture dataset</td>
+    <td>Reference: Kaggle Dataset. This data was extracted as a csv file. Contains 25MB of data.</td>
+    <td><a href="https://www.kaggle.com/datasets/mexwell/boxing-matches">Boxing matches</a></td>
+  </tr>
+</table>
