@@ -2,6 +2,8 @@ import pandas as pd
 import random as rd
 import numpy as np
 import os
+from datetime import datetime, timedelta
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -412,6 +414,40 @@ def merge_datasets(fight_results, df):
     merged_final = merged_final.dropna(subset=['Boxer_A', 'Boxer_B']) # removing any fighters without a name
     return merged_final
 
+def place_dates(start_date, end_date):
+    delta = end_date - start_date
+    random_days = np.random.randint(0, delta.days)
+    return (start_date + timedelta(days=int(random_days))).date()
+
+def assign_unique_fight_dates(df, fighter_col_A="Boxer_A", fighter_col_B="Boxer_B", start=datetime(2010, 1, 1), end=datetime(2025, 12, 31)):
+    assigned_dates = {}
+    generated_dates = []
+
+    for _, row in df.iterrows():
+        fighterA = row[fighter_col_A]
+        fighterB = row[fighter_col_B]
+
+        while True:
+            date_candidate = place_dates(start, end)
+
+            # Check if either fighter already has that date assigned
+            clash = False
+            for fighter in [fighterA, fighterB]:
+                if fighter in assigned_dates and date_candidate in assigned_dates[fighter]:
+                    clash = True
+                    break
+
+            if not clash:
+                # Assign this date to both fighters
+                for fighter in [fighterA, fighterB]:
+                    assigned_dates.setdefault(fighter, set()).add(date_candidate)
+                generated_dates.append(date_candidate)
+                break
+
+    df = df.copy()
+    df["Fight_Date"] = generated_dates
+    return df
+
 
 def boxer_dataset_transformation(df):
     clean_boxing_dataset(df)
@@ -442,6 +478,7 @@ def fighter_dataset_transformation(df):
     df = drop_unnamed(df)
     df = drop_columns(df)
     df = standardise_weight(df)
+    df = assign_unique_fight_dates(df)
 
     # 🔍 CASE 1 — Already merged: contains Boxer_A and Boxer_B
     if 'Boxer_A' in df.columns and 'Boxer_B' in df.columns:
