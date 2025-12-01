@@ -1,3 +1,6 @@
 import streamlit as st
 
-st.write("Welcome to the visualisation section")
+st.title("Welcome to the visualisation section")
+
+
+

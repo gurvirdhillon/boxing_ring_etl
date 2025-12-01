@@ -30,6 +30,9 @@ def main():
             )
         else:
             cov_command = f'ENV=test pytest --verbose {test_dir}'
+            
+            # if command == 'all':
+                # run_lint()
 
         subprocess.run(cov_command, shell=True)
     elif command == 'lint':
@@ -38,10 +41,18 @@ def main():
         raise ValueError(f"Unknown command: {command}")
 
 
+def run_lint() -> None:
+    print("Running linting for python and SQL")
+    print("Linting python file")
+    subprocess.run(["flake8"], ".")
+    subprocess.run(["sqlfluff", "lint", "."])
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise ValueError(
             "Usage: run_tests.py <unit|integration|component|all|lint>"
+            # need to run either unit, integration, etc... error^
         )
     else:
         main()

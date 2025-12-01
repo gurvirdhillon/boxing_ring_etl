@@ -1,6 +1,8 @@
 import sys
 import os
 import pandas as pd
+import subprocess
+from pathlib import Path
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -10,6 +12,23 @@ from src.utils.logging_utils import setup_logger
 from src.transform.clean_boxing_data import boxer_dataset_transformation, fighter_dataset_transformation
 
 logger = setup_logger("RUN_APP")
+
+
+def start_streamlit():
+    project_root = Path(__file__).resolve().parents[1]
+    streamlit_path = project_root / "src" / "streamlit" / "app.py"
+
+    if not streamlit_path.exists():
+        logger.error(f"Streamlit app not found at {streamlit_path}")
+        return None
+
+    process = subprocess.Popen(
+        ["streamlit", "run", str(streamlit_path)],
+        stdout=None,
+        stderr=None
+    )
+    logger.info("Streamlit available at launch at http://localhost:8501")
+    return process
 
 def main():
     if len(sys.argv) < 2:
@@ -39,11 +58,16 @@ def main():
         logger.warning(f"Fighter dataset not found at {fighter_file}. Skipping fighter transformation.")
 
     logger.info("Transform complete")
-
-
-    # return df_raw
-    # return df_transform3
-
+    
+    logger.info("Load Process Underway...")
+    
+    start_streamlit()
+    logger.info("ETL complete. Streamlit is running.")
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        logger.info("Interruption. Shutting off. Goodbye.")
 
 if __name__ == "__main__":
     main()
