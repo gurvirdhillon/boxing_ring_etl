@@ -368,7 +368,7 @@ def standardise_weight(df):
     if not weight_col:
         raise KeyError("No weight column found in dataframe")
 
-    df[weight_col] = pd.to_numeric(df[weight_col], errors='coerce') * 0.45359237
+    df[weight_col] = pd.to_numeric(df[weight_col], errors='coerce') * 0.45359237 # this weight was taken from online which converted 1lb to kg
     df['Weight_Class'] = df[weight_col].apply(assign_weight_class)
     df = df.reset_index().rename(columns={'index': 'Boxer_ID'})
     return df
