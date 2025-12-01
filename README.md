@@ -9,7 +9,7 @@ This project combined two datasets into the ETL pipeline. The project aims to co
 
 Prerequisite:  
 
-- Python version 3+ available at the <href="https://www.python.org/downloads/">python website.</href>
+- Python version 3+ available at the <a href="https://www.python.org/downloads/">python website.</href>
 - Pip installation
 - Git(to clone the repository)
 
