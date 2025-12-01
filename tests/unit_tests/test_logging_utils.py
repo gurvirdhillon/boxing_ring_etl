@@ -52,7 +52,7 @@ def test_setup_logger_creates_logger_with_handlers(mock_get_logger):
     with tempfile.TemporaryDirectory() as temp_dir:
         setup_logger("test", "test.log", base_path=temp_dir)
 
-        mock_logger.setLevel.assert_called_once_with(logging.DEBUG)
+        mock_logger.setLevel.assert_called_once_with(logging.INFO)
         assert mock_logger.addHandler.call_count == 2
 
 
@@ -65,3 +65,4 @@ def test_setup_logger_skips_handlers_if_already_exist(mock_get_logger):
     setup_logger("test", "test.log")
 
     mock_logger.addHandler.assert_not_called()
+
