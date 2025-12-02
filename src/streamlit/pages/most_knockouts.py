@@ -50,6 +50,7 @@ fighters_agg = (
             .agg({
                 "won": "max",
                 "kos": "max",
+                "lost": "min"
             }).reset_index()
 )
 
