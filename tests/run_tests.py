@@ -31,8 +31,8 @@ def main():
         else:
             cov_command = f'ENV=test pytest --verbose {test_dir}'
             
-            # if command == 'all':
-                # run_lint()
+            if command == 'all':
+                run_lint()
 
         subprocess.run(cov_command, shell=True)
     elif command == 'lint':
@@ -53,6 +53,7 @@ if __name__ == "__main__":
         raise ValueError(
             "Usage: run_tests.py <unit|integration|component|all|lint>"
             # need to run either unit, integration, etc... error^
+            # the way to run tests would be run_tests <unit|integration|component|all|lint>
         )
     else:
         main()
