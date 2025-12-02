@@ -119,7 +119,7 @@ Moreover, kanban was integrated with github issues which played a fundamental ro
 
 #### Project timeline
 
-
+<img src="appendices/timeline.png">
 
 ### The rules of boxing
 
@@ -181,8 +181,20 @@ Class is an attribute linked to "weight". To fight an opponent one must fit the 
 
 ### Git branches
 
+- main  
 
+This is the production environment which was used when a feature was finalised and ready to deploy. Upon feature completion a merge/pull request was done to ensure there were minimal merge conflicts. Furthermore, this had helped to promote working in silos before merging into the production environment(which in this case was main).
 
+- etl-test  
+
+Was used to test the code, all the functions as well as to work on the different folders within the tests.
+
+- etl-transform
+Was used to transform the csv changes after extraction and to clean the data. This would play a crucical role when comparing the two csv files with other branches.
+
+- viz  
+
+This branch was used to visualise the streamlit app once the load process was complete. This was also used to demonstrate the etl pipleine integration when running ```run_app dev``` it would run the streamlit app in parallel displaying the data as required.
 
 ### Further discussion
 

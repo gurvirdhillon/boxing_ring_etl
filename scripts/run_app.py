@@ -10,6 +10,7 @@ from config.env_config import setup_env
 from src.extract.extract import extract_data
 from src.utils.logging_utils import setup_logger
 from src.transform.clean_boxing_data import boxer_dataset_transformation, fighter_dataset_transformation
+from src.load.load import load_fight_dataset
 
 logger = setup_logger("RUN_APP")
 
@@ -60,6 +61,9 @@ def main():
     logger.info("Transform complete")
     
     logger.info("Load Process Underway...")
+    df = load_fight_dataset()
+    df.head()
+    
     
     start_streamlit()
     logger.info("ETL complete. Streamlit is running.")

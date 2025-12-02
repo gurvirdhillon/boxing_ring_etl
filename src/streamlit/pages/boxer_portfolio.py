@@ -31,6 +31,7 @@ def get_wikipedia_image(name):
     else:
         return None
 
+
 fighters_reunite = pd.concat([df['Boxer_A'], df['Boxer_B']], axis=0)
 fighters_reunite = fighters_reunite.dropna().drop_duplicates().sort_values().tolist()
 
