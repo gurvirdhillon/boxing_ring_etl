@@ -80,11 +80,11 @@ MoSCoW prioritisation had become very effective within the core functionality of
     <td>Should</td>
     <td>Generate synthetic dates which has a rule that a fighter cannot fight another individual on the same day.</td>
     <td>This is important as this can help to get the most up to date fighters record when analysing. Furthermore, more emphasis can be placed onto best of the year, most knockouts of the year, losses in the year etc</td>
-    <td><input type="checkbox"><td>
+    <td><input type="checkbox" checked><td>
     </tr>
    <tr>
     <td>Should</td>
-    <td>Must be able to showcase the top 10 best performing individuals at every weight class</td>
+    <td>Must be able to showcase the top 5 best performing individuals at every weight class</td>
     <td>Should because this is essential information when asking questions about the sport</td>
     <td><input type="checkbox"><td>
   </tr>
