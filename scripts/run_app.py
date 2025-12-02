@@ -17,7 +17,7 @@ logger = setup_logger("RUN_APP")
 
 def start_streamlit():
     project_root = Path(__file__).resolve().parents[1]
-    streamlit_path = project_root / "src" / "streamlit" / "app.py"
+    streamlit_path = project_root / "src" / "streamlit" / "presentation.py"
 
     if not streamlit_path.exists():
         logger.error(f"Streamlit app not found at {streamlit_path}")
