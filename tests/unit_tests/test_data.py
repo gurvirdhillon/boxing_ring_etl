@@ -34,3 +34,27 @@ def test_transformed_data_types(real_raw_fight_df):
         assert col in df.columns, f"Missing column: {col}"
         assert pd.api.types.is_dtype_equal(df[col].dtype, dtype), \
             f"Column {col} has wrong dtype: {df[col].dtype}, expected {dtype}"
+
+
+def test_value_ranges(real_raw_fight_df):
+    df = boxer_dataset_transformation(real_raw_fight_df)
+
+    assert (df["height_A"].between(150, 210)).all()
+    assert (df["height_B"].between(150, 210)).all()
+
+    assert (df["reach_A"].between(150, 220)).all()
+    assert (df["reach_B"].between(150, 220)).all()
+
+    assert (df["weight_A"].between(40, 130)).all()
+    assert (df["weight_B"].between(40, 130)).all()
+
+    assert (df["won_A"] >= 0).all()
+    assert (df["won_B"] >= 0).all()
+    assert (df["lost_A"] >= 0).all()
+    assert (df["lost_B"] >= 0).all()
+    assert (df["drawn_A"] >= 0).all()
+    assert (df["drawn_B"] >= 0).all()
+    assert (df["kos_A"] >= 0).all()
+    assert (df["kos_B"] >= 0).all()
+
+    assert (df["class_diff"] <= 1).all()
