@@ -3,6 +3,7 @@ import random as rd
 import numpy as np
 import os
 from datetime import datetime, timedelta
+import logging as logger
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -66,7 +67,7 @@ def clean_reach(df):
     df['height_A'].apply(lambda r: reach_estimation(r)))
 
     df['reach_B'] = df['reach_B'].fillna(df['height_B'].apply(lambda r: reach_estimation(r)))
-    return df['reach_A'], df['reach_B']
+    return df
 
 
 def clean_stance_columns(column):
@@ -115,6 +116,8 @@ def clean_height(df):
 
     df['height_A'] = df['height_A'].fillna(df['height_A'].mean())
     df['height_B'] = df['height_B'].fillna(df['height_B'].mean())
+    
+    return df
 
 
 def estimate_weight(height):
@@ -122,7 +125,7 @@ def estimate_weight(height):
     elif height < 170: return np.random.normal(65, 6)
     elif height < 175: return np.random.normal(72, 7)
     elif height < 180: return np.random.normal(78, 8)
-    elif height < 185: return np.random.normal(85, 9)  
+    elif height < 185: return np.random.normal(85, 9)
     else:
         return np.random.normal(95, 10)
 
@@ -177,64 +180,83 @@ def clean_draws(df):
 
 
 def clean_kos(df):
+    # sanitize lost columns
     df['lost_A'] = df['lost_A'].abs()
     df['lost_B'] = df['lost_B'].abs()
     
+    # Remove invalid KO values
     df['kos_A'] = df['kos_A'].apply(lambda x: x if pd.notna(x) and 0 <= x <= 70 else np.nan)
     df['kos_B'] = df['kos_B'].apply(lambda x: x if pd.notna(x) and 0 <= x <= 70 else np.nan)
-    
-    df['kos_A'] = df.apply(lambda row: min(row['kos_A'], row['won_A']) if pd.notna(row['kos_A']) else np.nan, axis=1)
-    df['kos_B'] = df.apply(lambda row: min(row['kos_B'], row['won_B']) if pd.notna(row['kos_B']) else np.nan, axis=1)
-    
-    df['kos_A'] = df['kos_A'].astype('float')
-    df['won_A'] = df['won_A'].astype('float')
-    df['kos_B'] = df['kos_B'].astype('float')
-    df['won_B'] = df['won_B'].astype('float')
-    
-    avg_ko_ratio = (df['kos_A'] / df['won_A']).mean()
 
+    # Cap KOs at wins — SAFE VERSION
     df['kos_A'] = df.apply(
-    lambda row: round(row['won_A'] * avg_ko_ratio)
-    if pd.isna(row['kos_A']) and pd.notna(row['won_A']) and row['won_A'] > 0
-    else row['kos_A'],
-    axis=1)
+        lambda row: min(row['kos_A'], row['won_A'])
+        if pd.notna(row['kos_A']) and pd.notna(row['won_A'])
+        else np.nan,
+        axis=1
+    )
 
-    df['kos_B'] = df.apply(lambda row: round(row['won_B'] * avg_ko_ratio)
-    if pd.isna(row['kos_B']) and pd.notna(row['won_B']) and row['won_B'] > 0
-        else row['kos_B'], axis=1)
-    
+    df['kos_B'] = df.apply(
+        lambda row: min(row['kos_B'], row['won_B'])
+        if pd.notna(row['kos_B']) and pd.notna(row['won_B'])
+        else np.nan,
+        axis=1
+    )
+
+    # Convert to floats for calculations
+    df['kos_A'] = df['kos_A'].astype('float')
+    df['kos_B'] = df['kos_B'].astype('float')
+    df['won_A'] = df['won_A'].astype('float')
+    df['won_B'] = df['won_B'].astype('float')
+
+    # Compute average KO ratio (safe)
+    avg_ko_ratio = (df['kos_A'] / df['won_A']).mean(skipna=True)
+
+    # Fill missing KO values using KO ratio
+    df['kos_A'] = df.apply(
+        lambda row: round(row['won_A'] * avg_ko_ratio)
+        if pd.isna(row['kos_A']) and pd.notna(row['won_A']) and row['won_A'] > 0
+        else row['kos_A'],
+        axis=1
+    )
+
+    df['kos_B'] = df.apply(
+        lambda row: round(row['won_B'] * avg_ko_ratio)
+        if pd.isna(row['kos_B']) and pd.notna(row['won_B']) and row['won_B'] > 0
+        else row['kos_B'],
+        axis=1
+    )
+
+    # Final integer conversion
     df['kos_A'] = df['kos_A'].round().astype('Int64')
     df['kos_B'] = df['kos_B'].round().astype('Int64')
-    
+
     return df
 
 
 def clean_score_cards(df):
-    # clean judges data
-    judge_columns = ['judge1_A', 'judge1_B', 'judge2_A', 'judge2_B', 'judge3_A', 'judge3_B']
-    for col in judge_columns:
+    judge_cols = [
+        'judge1_A', 'judge1_B',
+        'judge2_A', 'judge2_B',
+        'judge3_A', 'judge3_B'
+    ]
+
+    # 1. Remove invalid scores (<0 or >120)
+    for col in judge_cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
         df[col] = df[col].apply(lambda x: np.nan if x < 0 or x > 120 else x)
 
-    df['judge1_A'] = df['judge1_A'].fillna(df[['judge1_A', 'judge2_A', 'judge3_A']].mean(axis=1))
-    df['judge1_B'] = df['judge1_B'].fillna(df[['judge1_B', 'judge2_B', 'judge3_B']].mean(axis=1))
-    
-    judge_columns_A = ['judge1_A', 'judge2_A', 'judge3_A']
-    judge_columns_B = ['judge1_B', 'judge2_B', 'judge3_B']
+    # 2. Row-wise fill: A judges use A-side mean, B judges use B-side mean
+    A_side = ['judge1_A', 'judge2_A', 'judge3_A']
+    B_side = ['judge1_B', 'judge2_B', 'judge3_B']
 
-# Step 1: Remove invalid values (<0 or >120)
-    for col in judge_columns_A + judge_columns_B:
-        df[col] = df[col].apply(lambda x: np.nan if x < 0 or x > 120 else x)
+    df[A_side] = df[A_side].apply(lambda row: row.fillna(row.mean()), axis=1) # give the mean value of the rows data for judges score data
+    df[B_side] = df[B_side].apply(lambda row: row.fillna(row.mean()), axis=1)
 
-# Step 2: Fill missing values row-wise using A-side averages
-    df[judge_columns_A] = df[judge_columns_A].apply(
-        lambda row: row.fillna(row.mean()), axis=1
-    )
+    # 3. If still NaN (all judges missing), fill with plausible values
+    df[A_side] = df[A_side].fillna(114) # usually 114 given
+    df[B_side] = df[B_side].fillna(114)
 
-# Step 3: Fill missing values row-wise using B-side averages
-    df[judge_columns_B] = df[judge_columns_B].apply(
-        lambda row: row.fillna(row.mean()), axis=1
-    )
-    
     return df
 
 
@@ -244,10 +266,18 @@ def infer_results(df, row):
         return 'win_A'
     if pd.notna(row['kos_B']) and row['kos_B'] > 0:
         return 'win_B'
+    
+    # get scores
+    a_score = 0
+    b_score = 0
 
-    # Score comparison (NaN-safe)
-    a_score = sum(v for v in [row['judge1_A'], row['judge2_A'], row['judge3_A']] if pd.notna(v))
-    b_score = sum(v for v in [row['judge1_B'], row['judge2_B'], row['judge3_B']] if pd.notna(v))
+    for a, b in [
+        ('judge1_A', 'judge1_B'),
+        ('judge2_A', 'judge2_B'),
+        ('judge3_A', 'judge3_B'),
+    ]:
+        if pd.notna(row[a]): a_score += row[a]
+        if pd.notna(row[b]): b_score += row[b]
 
     if a_score > b_score:
         return 'win_A'
@@ -256,30 +286,28 @@ def infer_results(df, row):
 
     return 'draw'
 
-
-def fill_decision(df, row):
-    # Keep existing decision
-    if pd.notna(row['decision']):
+def fill_decision(row):
+    # Keep existing decision if its not na
+    if pd.notna(row.get('decision', None)):
         return row['decision']
 
-    # Infer based on KO counts
+    # KO overrides everything
     if pd.notna(row['kos_A']) and row['kos_A'] > 0:
         return 'KO'
     if pd.notna(row['kos_B']) and row['kos_B'] > 0:
         return 'KO'
 
-    # If result exists, apply logic safely
+    # Points decision
     if pd.notna(row['result']):
         if row['result'] in ['win_A', 'win_B']:
-            return 'UD'  # points win
+            return 'UD'
         if row['result'] == 'draw':
             return 'DRAW'
-    df['decision'] = df.apply(fill_decision, axis=1)
-        
-    return 'UNKNOWN'  # Fallback
+
+    return 'UNKNOWN'
 
 
-def assign_weight_class(weight):
+def assign_weight_class_fight(weight):
     if weight <= 50.8: return "Flyweight"
     elif weight <= 53.5: return "Bantamweight"
     elif weight <= 57.2: return "Featherweight"
@@ -295,8 +323,8 @@ def assign_weight_class(weight):
 
 
 def weight_class(df):
-    df['class_A'] = df['weight_A'].apply(assign_weight_class)
-    df['class_B'] = df['weight_B'].apply(assign_weight_class)
+    df['class_A'] = df['weight_A'].apply(assign_weight_class_fight)
+    df['class_B'] = df['weight_B'].apply(assign_weight_class_fight)
     
     weight_classes = {
         "Minimumweight": 1, "Light Flyweight": 2, "Flyweight": 3, "Super Flyweight": 4,
@@ -327,6 +355,8 @@ def weight_class(df):
     df['rank_A'] = df['class_A'].map(weight_classes)
     df['rank_B'] = df['class_B'].map(weight_classes)
     df['class_diff'] = abs(df['rank_A'] - df['rank_B'])
+    
+    return df
 
 # the second df transformation
 
@@ -346,7 +376,7 @@ def drop_columns(df):
     return df
 
 
-def assign_weight_class(weight):
+def assign_weight_class_fighter(weight):
     if weight < 52:
         return 'Flyweight'
     elif weight < 57:
@@ -371,7 +401,7 @@ def standardise_weight(df):
         raise KeyError("No weight column found in dataframe")
 
     df[weight_col] = pd.to_numeric(df[weight_col], errors='coerce') * 0.45359237 # this weight was taken from online which converted 1lb to kg
-    df['Weight_Class'] = df[weight_col].apply(assign_weight_class)
+    df['Weight_Class'] = df[weight_col].apply(assign_weight_class_fighter)
     df = df.reset_index().rename(columns={'index': 'Boxer_ID'})
     return df
 
@@ -404,20 +434,29 @@ def drop_unnamed(df):
 
 
 def fight_validation(df):
-    fight_results = fight_results[df['Boxer_A'] != df['Boxer_B']]
-    return fight_results
+    return df[df['Boxer_A'] != df['Boxer_B']]
 
+def merge_datasets(fight_df, fighter_df):
+    # Merge A-side attributes
+    merged = fight_df.merge(
+        fighter_df.add_prefix("_A").rename(columns={"Boxer_A": "Boxer_A"}),
+        on="Boxer_A", how="left"
+    )
 
-def merge_datasets(fight_results, df):
-    merged_final = pd.concat([fight_results.reset_index(drop=True), df.reset_index(drop=True)], axis=1)
-    merged_final = merged_final[merged_final['Boxer_A'] != merged_final['Boxer_B']]
-    merged_final = merged_final.dropna(subset=['Boxer_A', 'Boxer_B']) # removing any fighters without a name
-    return merged_final
+    # Merge B-side attributes
+    merged = merged.merge(
+        fighter_df.add_prefix("B_").rename(columns={"Boxer_B": "Boxer_B"}),
+        on="Boxer_B", how="left"
+    )
+
+    return merged
+
 
 def place_dates(start_date, end_date):
     delta = end_date - start_date
     random_days = np.random.randint(0, delta.days)
     return (start_date + timedelta(days=int(random_days))).date()
+
 
 def assign_unique_fight_dates(df, fighter_col_A="Boxer_A", fighter_col_B="Boxer_B", start=datetime(2010, 1, 1), end=datetime(2025, 12, 31)):
     assigned_dates = {}
@@ -450,20 +489,25 @@ def assign_unique_fight_dates(df, fighter_col_A="Boxer_A", fighter_col_B="Boxer_
 
 
 def boxer_dataset_transformation(df):
-    clean_boxing_dataset(df)
-    remove_duplicates(df)
-    clean_age_col(df)
-    clean_height(df)
-    clean_draws(df)
-    clean_kos(df)
-    clean_lost(df)
-    clean_reach(df)
-    clean_stance(df)
-    clean_weight(df)
-    clean_won(df)
-    clean_score_cards(df)
+    df = clean_boxing_dataset(df)
+    df = remove_duplicates(df)
+    
+    df = clean_weight(df)
+    df = clean_height(df)
+    df = clean_reach(df)
+    
+    df = clean_age_col(df)
+
+    df = clean_won(df)    
+    df = clean_kos(df)
+    df = clean_lost(df)
+    df = clean_draws(df)
+    df = clean_stance(df)
+    df = clean_score_cards(df)
 
     df['result'] = df.apply(lambda row: infer_results(df, row), axis=1)
+    df['decision'] = df.apply(lambda row: fill_decision(row), axis=1)
+
     return df
 
 
@@ -476,27 +520,37 @@ def get_boxer_name_column(df):
 
 def fighter_dataset_transformation(df):
     df = drop_unnamed(df)
-    df = drop_columns(df)
-    df = standardise_weight(df)
-    df = assign_unique_fight_dates(df)
+    df = drop_columns(df)  # removes Promoter, Ceiling, Action, Trainer
 
-    # 🔍 CASE 1 — Already merged: contains Boxer_A and Boxer_B
-    if 'Boxer_A' in df.columns and 'Boxer_B' in df.columns:
-        print("⚠️ Detected merged matchup dataset — skipping match generation.")
-        return df  # Or apply further cleaning if needed
+    # 1. Fix name column — ensure it is exactly "Boxer"
+    name_col = get_boxer_name_column(df)  # returns "Boxer"
+    df = df.rename(columns={name_col: "Boxer"})
 
-    # 🔍 CASE 2 — Clean original fighter data (no matching yet)
-    else:
-        name_col = get_boxer_name_column(df)
-        df = df.rename(columns={name_col: 'Boxer'})
-        df = df[['Boxer', 'Sex', 'Weight', 'Weight_Class']].drop_duplicates()
+    # 2. Clean boxer names so they match fight dataset
+    df["Boxer"] = (
+        df["Boxer"]
+        .str.replace(",", "")      # remove commas
+        .str.strip()
+        .str.title()               # make consistent casing
+    )
 
-        # Create matchups
-        df = merge_matchups(df, sample_size=5000)
-        df = df[df['Boxer_A'] != df['Boxer_B']]
+    # 3. Convert Weight lbs → kg (your data uses lbs)
+    df["Weight"] = pd.to_numeric(df["Weight"], errors="coerce") * 0.45359237
 
-        return df
+    # 4. Assign weight class
+    df["Weight_Class"] = df["Weight"].apply(assign_weight_class_fighter)
 
+    # 5. Build final cleaned fighter dataset
+    fighter_clean = df[[
+        "Boxer",
+        "Sex",
+        "Country",
+        "Weight",
+        "Weight_Class",
+        "Rating"
+    ]]
+
+    return fighter_clean
 
 if __name__ == "__main__":
     df_raw = pd.read_csv(os.path.join(raw_directory, raw_file_name))
@@ -506,10 +560,7 @@ if __name__ == "__main__":
     df_clean = boxer_dataset_transformation(df_raw.copy())
     df_clean.to_csv(os.path.join(processed_data_directory, processed_file_name), index=False)
 
-    # Transform fighter profile dataset
-    # second_clean = fighter_dataset_transformation(second_df.copy())
-    # second_clean.to_csv(os.path.join(processed_data_directory, "fighters_clean.csv"), index=False)
-
     print("Transformation complete. Cleaned files saved!")
+
 
 
