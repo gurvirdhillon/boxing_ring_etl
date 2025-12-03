@@ -327,8 +327,6 @@ Class is an attribute linked to "weight". To fight an opponent one must fit the 
   </tr> 
 </table>
 
-decision
-
 ### Git branches
 
 - main  
