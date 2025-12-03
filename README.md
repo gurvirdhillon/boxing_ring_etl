@@ -179,6 +179,156 @@ The prefix of _a and _b was used to differentiate the fighter from one another. 
 
 Class is an attribute linked to "weight". To fight an opponent one must fit the weight requirement which can be between a certain scale for example middleweight fighters must weigh between 154lbs-160lbs. The classification attribute was therefore created to highlight the weight class the fighters were fighting at.
 
+## Data Transformation
+
+<table>
+  <tr>
+  <tr>
+  <caption>Boxing Match Dataset</caption>
+  </tr>
+    <th>Dataset</th>
+    <th>Kept?</th>
+    <th>Reason for keeping?</th>
+    <th>Transformation process</th>
+  </tr>
+  <tr>
+    <td>Age_A/Age_B</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>May give us good insights into boxers performance by age demographic. From here</td>
+    <td>If the value was null I generated a random age between 18 and 45 years. This is because if I was to use the mean demographic this can affect the distribution of the data and would hinder the analytical processing. The reason it would be 18 is because this is the youngest a boxer can become a professional by sanctioning bodies of boxing.</td>
+  </tr>
+    <tr>
+    <td>reach_a/reach_b</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>Reach was also a metric that was used. The hope was to see if a higher reach meant a higher chance of a knockout.</td>
+    <td>Again numpy was used based on height to ensure that the height was proportionate to the reach. To ensure this accuracy height must be computed first.</td>
+  </tr>
+    <tr>
+    <td>stance_A/stance_B</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>Would be good to analyse if different stances have a higher percentage of a knockout. May be used as a potential future work.</td>
+    <td>Had cleaned the data by removing whitespacing, outliers in the data, placing a probability of the boxer being "orthodox", "southpaw" based on my own experience of watching boxing.</td>
+  </tr>
+    <tr>
+    <td>weight_A/weight_B</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>This was crucial for classifying the boxer by weight category.</td>
+    <td>The transformation had used a range between 40 and 130 if the height wasn't accounted for. But if the height was accounted for it would use a Numpy distribution depending on the boxers height. The taller the boxer is the more likely they are to have a higher weight.</td>
+  </tr>
+    <tr>
+    <td>height_a/height_b</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>Further data can be analysed to see if having height can affect performance(more wins, going on points etc)</td>
+    <td>This was an estimate based on the classification of their weight. Depending on their weight I would utilised the Numpy library to create a distribution where it assigns a numeric value based on the boxers height. If weight is not filled in it would get the average height.</td>
+  </tr>
+  <tr>
+    <td>won_A/won_B</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>This was used to find the amount of wins a fighter may have on their record. This can help to produce the best of all time as a table.</td>
+    <td>The mean of the wins was computed of the current number of wins was complete. I also used a validation metric which would find a in between value for the number of fights a fighter would have over the span of their career. Typically a fighter would have 50 fights over their career but this was raised higher in the case of anomalies. Furthermore, turning the positive to integer was done to prevent unclean data.</td>
+  </tr>
+  <tr>
+  <td>lost_A/lost_B</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>This can help to produce loss leaders in the different divisions.</td>
+    <td>On average the loss rate compared to win rate within boxing is higher therefore, if na fill a number between 0 and 130(inclusive). This is due to higher level of competition within boxing.</td>
+  </tr>
+  <tr>
+  <td>drawn_A/drawn_B</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>As wins and losses were accounted, draws would allow for a holistic view of boxing as a whole.</td>
+    <td>The draw rate was set between 0 and 20 for values and a median was drawn from the given distribution of drawn_a and drawn_b columns</td>
+  </tr>
+    <tr>
+  <td>kos_A/kos_B</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>This would allow us to see the knockout percentage of the individual when boxing and how many fights go to points.</td>
+    <td>The data was standardised to ensure that knockouts are never above the number of wins.</td>
+  </tr>
+  <tr>
+  <td>result</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>I chose to keep the results as boxing matches require the end result and many attributes such as wins requires results. For future work incrementing the boxers wins dynamically will be taken into account.</td>
+    <td>Results required to see many attributes such as the judges scorecards and to summarise the score cards. Whoever had returned a higher sum was declared the winner. Otherwise the bout would end in a draw.</td>
+  </tr>
+  <tr>
+  <td>decision</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>This was used to show what decision had formed whether it was a disqualification/knockout etc. This was used to see the amount of knockouts, unanimous decisions and other forms of decisions within boxing as a future work</td>
+    <td>Decision was messy data in itself. It was stripped. Placed in upper casing for standardisation and replaced with abbreviations.</td>
+  </tr>
+  <tr>
+  <td>judge1_A/.../judge3_B
+</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>Would be interesting to see what each judge scored the contest.</td>
+    <td>If the value was null for judge1_B, the transformation process would first identify the location of the row and estimate the average score of all the other judges. If not it would then do a fall back by giving the contest 114.</td>
+  </tr>
+</table>
+
+
+<table>
+  <tr>
+  <tr>
+  <caption>Fighter Dataset</caption>
+  </tr>
+    <th>Dataset</th>
+    <th>Kept?</th>
+    <th>Reason for keeping?</th>
+    <th>Transformation process</th>
+  </tr>
+  <tr>
+    <td>Rating</td>
+    <td>No<input type="checkbox"></td>
+    <td>Not needed for the purpose of this etl project</td>
+    <td>Dropped column</td>
+  </tr>
+  <tr>
+    <td>Boxer</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>Need to know the name of the fighter</td>
+    <td>Dropped any na values</td>
+  </tr>
+    <tr>
+    <td>Country</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>Need to know the originality of the fighter for Tableau/streamlit analysis.</td>
+    <td>Dropped any na records for fighters without countries.</td>
+  </tr>  
+    <tr>
+    <td>Weight</td>
+    <td>Yes<input type="checkbox" checked=True></td>
+    <td>Needed information about the fighters natural weight class. This can then be brought over to the weight classes and as a future work I plan on matching the fighters weight from the dataset with the fighter weight on the other dataset.</td>
+    <td>Standardised the weight by converting lbs to kg so when merging datasets this will ensure a standardised format of weight. I did this by getting the current lbs data in the fighters dataset and multiplying by 0.0.45359(found by a conversion on google)</td>
+  </tr>  
+      <tr>
+    <td>Ceiling</td>
+    <td>No<input type="checkbox"></td>
+    <td>Unneeded - out of the scope of the project</td>
+    <td>Dropped column</td>
+  </tr>
+    <tr>
+    <td>Action</td>
+    <td>No<input type="checkbox"></td>
+    <td>Unneeded - out of the scope of the project</td>
+    <td>Dropped column</td>
+  </tr>  
+      <tr>
+    <td>Trainer</td>
+    <td>No<input type="checkbox"></td>
+    <td>Unneeded - out of the scope of the project</td>
+    <td>Dropped column</td>
+  </tr>  
+    <tr>
+    <td>Sex</td>
+    <td>Yes<input type="checkbox"></td>
+    <td>Would be interesting to see the number of males/females for analysis.</td>
+    <td>Data was already clean.</td>
+  </tr> 
+</table>
+
+decision
+
 ### Git branches
 
 - main  
