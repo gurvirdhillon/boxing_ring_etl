@@ -18,6 +18,19 @@ def load_fight_dataset():
     df = pd.read_csv(path)
     return df
 
+
+def validate_column_count(df: pd.DataFrame, expected_count: int):
+    """Validate DataFrame has expected number of columns."""
+    if df.shape[1] != expected_count:
+        raise ValueError(f"Expected {expected_count} columns, got {df.shape[1]}.")
+
+
+def validate_row_count(df: pd.DataFrame, expected_count: int):
+    """Validate DataFrame has expected number of rows."""
+    if df.shape[0] != expected_count:
+        raise ValueError(f"Expected {expected_count} rows, got {df.shape[0]}.")
+
+
 if __name__ == "__main__":
     df_fights = load_fight_dataset()
     logging.info("Load Complete - combined dataset inplace")

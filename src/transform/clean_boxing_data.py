@@ -518,6 +518,37 @@ def get_boxer_name_column(df):
     raise KeyError(f"No valid boxer name column found. Available columns: {df.columns.tolist()}")
 
 
+EXPECTED_FIGHTER_COLUMNS = {
+    'Rating_A', 'Boxer_A', 'Country_A', 'Weight_A', 'age_A',
+    'height_A', 'reach_A', 'stance_A', 'won_A', 'lost_A',
+    'drawn_A', 'kos_A', 'judge1_A', 'judge2_A', 'judge3_A', 'class_A',
+    'rank_A',
+
+    'Rating_B', 'Boxer_B', 'Country_B', 'Weight_B', 'age_B',
+    'height_B', 'reach_B', 'stance_B', 'won_B', 'lost_B',
+    'drawn_B', 'kos_B', 'judge1_B', 'judge2_B', 'judge3_B', 'class_B',
+    'rank_B',
+
+    'Sex', 'Weight_Class', 'decision', 'class_diff',
+    'result', 'Fight_Date'
+}
+
+
+def fight_data_transform(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Validates and enforces the schema for fight records
+    containing both Fighter A and Fighter B columns.
+    """
+
+    df_clean = df.copy()
+
+    for col in EXPECTED_FIGHTER_COLUMNS:
+        if col not in df_clean.columns:
+            df_clean[col] = pd.NA
+
+    return df_clean[list(EXPECTED_FIGHTER_COLUMNS)]
+
+
 def fighter_dataset_transformation(df):
     df = drop_unnamed(df)
     df = drop_columns(df)  # removes Promoter, Ceiling, Action, Trainer
@@ -529,9 +560,9 @@ def fighter_dataset_transformation(df):
     # 2. Clean boxer names so they match fight dataset
     df["Boxer"] = (
         df["Boxer"]
-        .str.replace(",", "")      # remove commas
+        .str.replace(",", "") # remove commas
         .str.strip()
-        .str.title()               # make consistent casing
+        .str.title()  # make consistent casing
     )
 
     # 3. Convert Weight lbs → kg (your data uses lbs)

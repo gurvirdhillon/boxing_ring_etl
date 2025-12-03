@@ -1,5 +1,5 @@
 import pandas as pd
-from src.transform.clean_boxing_data import clean_age_col, fighter_dataset_transformation
+from src.transform.clean_boxing_data import clean_age_col, fighter_dataset_transformation, fight_data_transform
 
 
 def test_valid_age():
@@ -63,23 +63,26 @@ fake_data = pd.DataFrame({
     })
 
 
-def test_columns_present():
-    df = fighter_dataset_transformation(fake_data)
+def test_fight_dataset_column_count():
     expected_columns = {
-    'Rating_A', 'Boxer_A', 'Country_A', 'Weight_A', 'age_A',
-    'height_A', 'reach_A', 'stance_A', 'won_A', 'lost_A',
-    'drawn_A', 'kos_A', 'judge1_A', 'judge2_A', 'judge3_A', 'class_A',
-    'rank_A',
+        'Rating_A', 'Boxer_A', 'Country_A', 'Weight_A', 'age_A',
+        'height_A', 'reach_A', 'stance_A', 'won_A', 'lost_A',
+        'drawn_A', 'kos_A', 'judge1_A', 'judge2_A', 'judge3_A', 'class_A',
+        'rank_A',
 
-    'Rating_B', 'Boxer_B', 'Country_B', 'Weight_B', 'age_B',
-    'height_B', 'reach_B', 'stance_B', 'won_B', 'lost_B',
-    'drawn_B', 'kos_B', 'judge1_B', 'judge2_B', 'judge3_B', 'class_B',
-    'rank_B',
+        'Rating_B', 'Boxer_B', 'Country_B', 'Weight_B', 'age_B',
+        'height_B', 'reach_B', 'stance_B', 'won_B', 'lost_B',
+        'drawn_B', 'kos_B', 'judge1_B', 'judge2_B', 'judge3_B', 'class_B',
+        'rank_B',
 
-    'Sex', 'Weight_Class', 'decision', 'class_diff',
-    'result', 'Fight_Date'
-}
-    
-    actual_columns = set(df.columns)
-    missing = expected_columns - actual_columns
-    assert not missing, f"missing columns {missing}"
+        'Sex', 'Weight_Class', 'decision', 'class_diff',
+        'result', 'Fight_Date'
+    }
+
+    df = fight_data_transform(fake_data)
+
+    assert df.shape[1] == len(expected_columns), \
+        f"Expected {len(expected_columns)} columns, got {df.shape[1]}"
+
+
+
