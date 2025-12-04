@@ -31,6 +31,17 @@ def validate_row_count(df: pd.DataFrame, expected_count: int):
         raise ValueError(f"Expected {expected_count} rows, got {df.shape[0]}.")
 
 
+def save_processed_data(df: pd.DataFrame, output_path):
+    """
+    Saves processed dataframe to a CSV file.
+    """
+
+    # Ensure proper string path
+    output_path = str(output_path)
+
+    df.to_csv(output_path, index=False)
+    return output_path
+
 if __name__ == "__main__":
     df_fights = load_fight_dataset()
     logging.info("Load Complete - combined dataset inplace")
