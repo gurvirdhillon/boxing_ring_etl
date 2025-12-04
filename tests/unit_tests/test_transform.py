@@ -1,6 +1,6 @@
 import pandas as pd
 from unittest.mock import patch
-from src.transform.clean_boxing_data import clean_age_col, fight_data_transform, clean_stance, clean_height, clean_weight, clean_kos, infer_results, fill_decision
+from src.transform.clean_boxing_data import clean_age_col, clean_score_cards, fight_data_transform, fighter_dataset_transformation, clean_stance, clean_height, clean_weight, clean_kos, infer_results, fill_decision, clean_draws, assign_weight_class_fight, drop_columns, drop_unnamed, weight_class, get_boxer_name_column, assign_unique_fight_dates, merge_matchups
 
 
 def test_valid_age():
@@ -180,3 +180,122 @@ def test_fill_decision_detects_ko():
     row = pd.Series({"decision": None, "kos_A": 1, "kos_B": None, "result": None})
     assert fill_decision(row) == "KO"
 
+
+def test_clean_draws_handles_invalid_and_fills_with_median():
+    df = pd.DataFrame({
+        "drawn_A": [-1, 30, None, 2],   # invalid, invalid, missing, valid
+        "drawn_B": [5, None, 50, -3]    # valid, missing, invalid, invalid
+    })
+
+    cleaned = clean_draws(df)
+
+    # All values must be non-negative and <=20
+    assert cleaned["drawn_A"].between(0, 20).all()
+    assert cleaned["drawn_B"].between(0, 20).all()
+
+    # Column must be Int64 dtype
+    assert str(cleaned["drawn_A"].dtype) == "Int64"
+
+
+def test_assign_weight_class_fight_ranges():
+    assert assign_weight_class_fight(48) == "Flyweight"
+    assert assign_weight_class_fight(53) == "Bantamweight"
+    assert assign_weight_class_fight(60) == "Lightweight"
+    assert assign_weight_class_fight(68) == "Super Welterweight"
+    assert assign_weight_class_fight(85) == "Cruiserweight"
+    assert assign_weight_class_fight(120) == "Heavyweight"
+
+
+def test_drop_columns_and_drop_unnamed():
+    df = pd.DataFrame({
+        "Promoter": ["A"],
+        "Trainer": ["B"],
+        "Unnamed: 0": [5],
+        "Other": [1]
+    })
+
+    cleaned = drop_columns(df)
+    cleaned = drop_unnamed(cleaned)
+
+    assert "Promoter" not in cleaned.columns
+    assert "Trainer" not in cleaned.columns
+    assert "Unnamed: 0" not in cleaned.columns
+    assert "Other" in cleaned.columns
+
+
+def test_weight_class_adjusts_invalid_class_differences():
+    df = pd.DataFrame({
+        "weight_A": [80, 50],
+        "weight_B": [120, 51]
+    })
+
+    cleaned = weight_class(df)
+
+    # Class diff must be <= 1 after fix
+    assert (cleaned["class_diff"] <= 1).all()
+
+
+def test_get_boxer_name_column_detects_name_variants():
+    df = pd.DataFrame({"Fighter": ["Floyd"]})
+    # Fighter is a line referred to in the get boxer name column which gets access to the individuals name in a list
+    assert get_boxer_name_column(df) == "Fighter"
+
+
+def test_fighter_dataset_transformation_basic():
+    df = pd.DataFrame({
+        "Name": ["John Doe"],
+        "Sex": ["M"],
+        "Country": ["US"],
+        "Weight": ["200"],
+        "Rating": [5.0]
+    })
+
+    cleaned = fighter_dataset_transformation(df)
+
+    assert "Boxer" in cleaned.columns
+    assert cleaned["Weight"].iloc[0] > 0  # converted to kg
+
+
+def test_assign_unique_fight_dates_no_collision():
+    df = pd.DataFrame({
+        "Boxer_A": ["A", "A"],
+        "Boxer_B": ["B", "C"],
+    })
+
+    out = assign_unique_fight_dates(df)
+
+    # No fighter fights twice on same day
+    assert len(out["Fight_Date"].unique()) == 2
+
+
+def test_clean_score_cards_handles_invalid_and_fills_means():
+    df = pd.DataFrame({
+        "judge1_A": [200, None],  # invalid → NaN, missing
+        "judge1_B": [100, 100],
+        "judge2_A": [90, None],
+        "judge2_B": [200, None],  # invalid
+        "judge3_A": [None, None],
+        "judge3_B": [95, None]
+    })
+
+    cleaned = clean_score_cards(df)
+
+    # All values must be between 0 and 120
+    for col in ["judge1_A","judge2_A","judge3_A","judge1_B","judge2_B","judge3_B"]:
+        assert cleaned[col].between(0, 120).all()
+
+    # No NaNs left
+    assert cleaned.isna().sum().sum() == 0
+
+
+def test_merge_matchups_creates_pairs():
+    df = pd.DataFrame({
+        "Boxer": ["A", "B", "C"],
+        "Sex": ["M", "M", "M"],
+        "Weight_Class": ["Welterweight"] * 3
+    })
+
+    result = merge_matchups(df)
+
+    # Expected pairs: AB, AC, BC
+    assert len(result) == 3
