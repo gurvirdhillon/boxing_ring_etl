@@ -209,9 +209,13 @@ def clean_kos(df):
     df['won_A'] = df['won_A'].astype('float')
     df['won_B'] = df['won_B'].astype('float')
 
-    # Compute average KO ratio (safe)
+    # Compute average KO ratio
     avg_ko_ratio = (df['kos_A'] / df['won_A']).mean(skipna=True)
+    
+    if pd.isna(avg_ko_ratio) or avg_ko_ratio == 0:
+        avg_ko_ratio = 0.5
 
+    
     # Fill missing KO values using KO ratio
     df['kos_A'] = df.apply(
         lambda row: round(row['won_A'] * avg_ko_ratio)
