@@ -10,7 +10,7 @@ def main():
         'unit': {'dir': 'tests/unit_tests', 'cov': ['config', 'src']},
         'integration': {'dir': 'tests/integration_tests', 'cov': []},
         'component': {'dir': 'tests/component_tests', 'cov': []},
-        'all': {'dir': 'tests', 'cov': ['config', 'etl']},
+        'all': {'dir': 'tests', 'cov': ['config', 'src']},
     }
 
     # Check to see if a command was supplied for the test run
@@ -30,7 +30,7 @@ def main():
             )
         else:
             cov_command = f'ENV=test pytest --verbose {test_dir}'
-            
+
             if command == 'all':
                 run_lint()
 

@@ -12,3 +12,6 @@ def real_raw_fight_df():
 
     df = pd.read_csv(csv_path)
     return df.copy()
+
+# this is a global fixture file for pytest to automatically test the tests
+# just like the run_tests
