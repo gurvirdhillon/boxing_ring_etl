@@ -31,6 +31,7 @@ def start_streamlit():
     logger.info("Streamlit available at launch at http://localhost:8501")
     return process
 
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python run_app.py <dev|test|prod>")
@@ -64,7 +65,6 @@ def main():
     df = load_fight_dataset()
     df.head()
     
-    
     start_streamlit()
     logger.info("ETL complete. Streamlit is running.")
     try:
@@ -72,6 +72,7 @@ def main():
             pass
     except KeyboardInterrupt:
         logger.info("Interruption. Shutting off. Goodbye.")
+
 
 if __name__ == "__main__":
     main()

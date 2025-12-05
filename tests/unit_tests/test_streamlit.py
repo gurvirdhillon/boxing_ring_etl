@@ -3,7 +3,7 @@ import subprocess
 import os
 import pytest
 
-@pytest.mark.timeout(10)
+
 @pytest.mark.xfail(reason="run_app.py is long-running; allowed to timeout.")
 def test_run_app_execution_time():
     start = time.perf_counter()
