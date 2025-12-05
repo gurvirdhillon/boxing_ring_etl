@@ -189,7 +189,7 @@ def test_clean_draws_handles_invalid_and_fills_with_median():
 
     cleaned = clean_draws(df)
 
-    # All values must be non-negative and <=20
+    # All values must be non-negative and less than or equal to 20
     assert cleaned["drawn_A"].between(0, 20).all()
     assert cleaned["drawn_B"].between(0, 20).all()
 

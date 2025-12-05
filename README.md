@@ -5,6 +5,38 @@
 This project combined two datasets into the ETL pipeline. The project aims to combine a boxers data with information about fight results. 
 
 
+## Index Section
+
+<a href="#Installations">Installation</a>  
+
+<a href="#Project-Management">Project Management</a>  
+
+<a href="#Kanban">Kanban</a>
+
+<a href="#Project-timeline">Project timeline</a>
+
+<a href="#The-Rules-of-Boxing">The Rules of Boxing</a>  
+
+<a href="#Understanding-the-Data">Understanding the Data</a>
+
+<a href="#Data-Extraction">Data Extraction</a>
+
+<a href="#Data-Transformation">Data Transformation</a>
+
+<a href="#Data-Load">Data Load</a>
+
+<a href="#Testing">Testing</a>
+
+<a href="#Future-Developments">Future Developments</a>
+
+<a href="#Challenges">Challenges</a>
+
+<a href="#Takeaways">Takeaways</a>
+
+<a href="#Git-Branches">Git Branches</a>
+
+<a href="#Further-Discussion">Further Discussion</a>
+
 ## Installations
 
 Prerequisite:  
@@ -121,7 +153,7 @@ Moreover, kanban was integrated with github issues which played a fundamental ro
 
 <img src="appendices/timeline.png">
 
-### The rules of boxing
+### The Rules of Boxing
 
 Boxing is a physical sport where both athletes are assessed by a series of judges on a round to round basis. Each athlete is scored on their performance. Things that may affect the score can be:
 
@@ -179,7 +211,11 @@ The prefix of _a and _b was used to differentiate the fighter from one another. 
 
 Class is an attribute linked to "weight". To fight an opponent one must fit the weight requirement which can be between a certain scale for example middleweight fighters must weigh between 154lbs-160lbs. The classification attribute was therefore created to highlight the weight class the fighters were fighting at.
 
-## Data Transformation
+# Data Extraction
+
+
+
+# Data Transformation
 
 <table>
   <tr>
@@ -322,12 +358,233 @@ Class is an attribute linked to "weight". To fight an opponent one must fit the 
     <tr>
     <td>Sex</td>
     <td>Yes<input type="checkbox"></td>
-    <td>Would be interesting to see the number of males/females for analysis.</td>
+    <td>Would be interesting to see the number of males/females boxers for analysis.</td>
     <td>Data was already clean.</td>
   </tr> 
 </table>
 
-### Git branches
+# Data Load
+
+The data was loaded into a final processed folder in which lied the last data during the transformation process. This was data that was ready to be used by Streamlit and Tableau for analytical purposes.
+
+# Testing
+
+Unit testing had been utilised extensively to test out different features within the application. A table has been provided to show the function name, which file and what its used to do.
+
+<table>
+  <tr>
+    <th>Function Name(test)</th>
+    <th>File Reference</th>
+    <th>What its used to do</th>
+  </tr>
+  <tr>
+    <td>test_transformed_data_types</td>
+    <td>unit_tests/test_data</td>
+    <td>This was used to test the data types for the given data in the original function boxer_dataset_transformation.</td>
+  </tr>
+  <tr>
+    <td>test_value_ranges</td>
+    <td>unit_tests/test_data</td>
+    <td>This was used to sanity check the range of data from the given ranges during the transformation phase.</td>
+  </tr>
+  <tr>
+    <td>test_drop_columns</td>
+    <td>unit_tests/test_dropped_columns</td>
+    <td>This tests the drop of 3 columns(promoter, trainer, action)</td>
+  </tr>
+  <tr>
+    <td>test_drop_unnamed_columns</td>
+    <td>unit_tests/test_dropped_columns</td>
+    <td>Tests for the removal of the unnamed column</td>
+  </tr>
+  <tr>
+    <td>test_extract_raw_data</td>
+    <td>unit_tests/test_extract</td>
+    <td>This mocks a test function which extracts the raw data and returns columns of the data in the pandas dataframe.</td>
+  </tr>
+  <tr>
+  <td>test_load_processed_fighter_file</td>
+  <td>unit_tests/test_load</td>
+  <td>This tests that the data has been loaded into the right folder and checks if there is quantities within the dataframe if not returns empty.</td>
+  </tr>
+  <tr>
+  <td>test_missing_processed_fighter_file</td>
+  <td>unit_tests/test_load</td>
+  <td>This returns a file not found error if the loaded data doesnt contain the specified path.</td>
+  </tr>
+  <tr>
+  <td>test_validate_column_count_passes</td>
+  <td>unit_tests/test_load</td>
+  <td>This returns a file not found error if the loaded data doesnt contain the specified path.</td>
+  </tr>
+  <tr>
+  <td>test_validate_row</td>
+  <td>unit_tests/test_load</td>
+  <td>This checks the number of rows return as we expect and we compare this by getting the first value of the shape and comparing it to the number of rows within the dataset that we expect it to be.</td>
+  </tr>
+    <tr>
+  <td>test_run_app_execution_time</td>
+  <td>unit_tests/test_streamlit</td>
+  <td>This checks the streamlit runs and if it goes over 10 seconds to check if its running it skips.</td>
+  </tr>
+  <tr>
+  <td>test_valid_age</td>
+  <td>unit_tests/test_transform</td>
+  <td>This checks the boxers age is a valid number between 18 and 43. If it is not a valid age it autogenerates a number for the individual. Furthermore, data ranges ensure that all the integers returned are positive.</td>
+  </tr>
+  <tr>
+  <td>test_fight_dataset_column_count</td>
+  <td>unit_tests/test_transform</td>
+  <td>This tests that the numerous columns are present within one of the rows using fake data</td>
+  </tr>
+  <tr>
+  <td>test_clean_stance_standardises_values_and_fills_missing</td>
+  <td>unit_tests/test_transform</td>
+  <td>This tests whether the transformed stance data is clean in the correct format.</td>
+  </tr>
+  <tr>
+  <td>test_clean_height_handles_missing_and_invalid_values</td>
+  <td>unit_tests/test_transform</td>
+  <td>This checks the height of the given data point and returns if it falls within a valid range.</td>
+  </tr>
+  <tr>
+  <td>test_clean_weight_replaces_invalid_and_missing</td>
+  <td>unit_tests/test_transform</td>
+  <td>This tests whether the boxer falls into a valid weight by checking the clean_weight function that was used in the transformation stage. If it returns values that were valid then it will undertake the process of validating the data by replacing the datapoint.</td>
+  </tr>
+    <tr>
+  <td>test_clean_kos_caps_invalid_and_fills_missing</td>
+  <td>unit_tests/test_transform</td>
+  <td>Finds the edge cases for both the knock outs and fills in the missing values.</td>
+   </tr>
+       <tr>
+  <td>test_infer_results_ko_logic</td>
+  <td>unit_tests/test_transform</td>
+  <td>This tests if someone has a higher knockout ratio in comparison to the other boxer this infers they will win(in theory).</td>
+   </tr>
+     <td>test_infer_results_scorecard_logic</td>
+  <td>unit_tests/test_transform</td>
+  <td>This is a crucial test to check that the logic of the judges score card work. It works by faking data of a judge score cards and ensuring score cards are added up and compared to the other fighters score cards.</td>
+   </tr>
+   <tr>
+   <td>test_fill_decision_preserves_existing_value</td>
+   <td>unit_tests/test_transform</td>
+   <td>This assures us that if a decision has been filled, it sticks with the decision that has been honoured.</td>
+   </tr>
+  <tr>
+   <td>test_fill_decision_detects_ko</td>
+   <td>unit_tests/test_transform</td>
+   <td>This ensures that a knockout is detected when the data is correctly filled in as required.</td>
+   </tr>
+   <tr>
+   <td>test_clean_draws_handles_invalid_and_fills_with_median</td>
+   <td>unit_tests/test_transform</td>
+   <td>this checks if the data that has been inputted is a valid number and is between the specified range.</td>
+   </tr>
+  <tr>
+   <td>test_assign_weight_class_fight_ranges</td>
+   <td>unit_tests/test_transform</td>
+   <td>Tests if the weight specified in the original file is classified into the right category</td>
+  </tr>
+  <tr>
+   <td>test_weight_class_adjusts_invalid_class_differences</td>
+   <td>unit_tests/test_transform</td>
+   <td>This tests if there is a significant weight categorisation difference in the data. If its over one weight class it returns as invalid.</td>
+  </tr>
+  <tr>
+   <td>test_get_boxer_name_column_detects_name_variants</td>
+   <td>unit_tests/test_transform</td>
+   <td>This ensures that the fighter's name is returned which was a specified variable in the get_boxer_name_column function.</td>
+  </tr>
+  <tr>
+   <td>test_fighter_dataset_transformation_basic</td>
+   <td>unit_tests/test_transform</td>
+   <td>This ensures that the right data of the fighter is returned.</td>
+  </tr>
+  <tr>
+   <td>test_assign_unique_fight_dates_no_collision</td>
+   <td>unit_tests/test_transform</td>
+   <td>This tests whether two fighters are fighting on different days.</td>
+  </tr>
+    <tr>
+   <td>test_clean_score_cards_handles_invalid_and_fills_means</td>
+   <td>unit_tests/test_transform</td>
+   <td>Tests the score cards and if the score card is not correctly filled out it produces an average value from the distribution of the data.</td>
+  </tr>
+  <tr>
+   <td>test_merge_matchups_creates_pairs</td>
+   <td>unit_tests/test_transform</td>
+   <td>This function checks when the merge occurs that the data created shows pairs that can fight against one another. </td>
+  </tr>
+  <tr>
+   <td>test_get_wikipedia_image_success</td>
+   <td>unit_tests/test_wiki_api_function</td>
+   <td>This function gets the success of the image upload(is the happy path)</td>
+  </tr>
+  <tr>
+   <td>test_get_wikipedia_image_no_thumbnail</td>
+   <td>unit_tests/test_wiki_api_function</td>
+   <td>Returns no thumbnail for the image if it wasnt available upon request when magic mock generates a fake data request</td>
+  </tr>
+  <tr>
+   <td>test_get_wikipedia_image_failure_status</td>
+   <td>unit_tests/test_wiki_api_function</td>
+   <td>When magic mock is called it checks if a failure has occured and .</td>
+  </tr>
+  
+  
+## Test coverage by file
+<img src="appendices/test_cov.png">   
+
+## Test coverage by functions
+<img src="appendices/test_cov_functions.png">
+</table>
+
+
+## Future Developments
+
+<ol>
+<li>Display more accurate data(for example heavyweights in the boxer dataset column is honoured on the crossover to the final cleaned dataset)</li>  
+<p>
+<li>Minor bug fixing</li>  
+<p>
+<li>Aiming for more consistency within the dataset.</li>  
+<p>
+<li>Create a prediction algorithm using Scikit-Learn for match-ups and chance of a knockout either way, points etc.</li>  
+<p>
+<li>Incorporate power rating, using attributes of defense, footwork etc and placing it within a radar graph.</li>  
+<p>
+<li>Cloud Migration of the environment??</li>
+This would depend on the overall cost of the cloud migration. But would only be done for a limited amount of time before deleting.
+</ol>
+
+# Challenges
+
+<h3>Inconsistent data during the transformation process</h3>
+Dataset had contained inconsistent records, missing values, duplicate data. Cleaning had taken most of the time set which I was given. The inconsistencies had meant decision making must be made!!  
+
+<h3>Designing a modular and maintainable ETL pipeline</h3>  
+A lot of the transformation phase was modularised and many csv's caused confusion even for myself. Documentation played a crucial role.  
+
+<h3>Bottlenecks in the pipeline😡</h3>  
+The ETL process due to large volumes of data had caused huge problems in terms of the performance. Sometimes returning results within minutes after run_app dev would be called. This led to a lot of wait time.  
+
+<h3>Communicating the Domain</h3>
+Tested even my own knowledge (after years of experience in watching boxing). Being able to communicate this knowledge with a variation of experience with the sport is a skill in itself.
+
+# Takeaways
+
+<h3>Project Management</h3>
+The utilisation of a kanban board, using an agile approach, MuSCoW Prioritisation of the project and splitting the task according to priority listings.
+
+<h3>What you set out to do isn't always the end product, but thats the agile way</h3>
+As old requirements may change, new ones may be added in. Some featurues may be not worth doing due to resource limitations but this all comes from experience.
+
+<h3>Emphasis on forward thinking for the whole ETL process</h3>
+Some decisions made earlier may limit or alternatively may help you in the long run. Being able to drop data can be as helpful as keeping the data if it means reducing bottlenecks and its overall performance. A useful tactic that from hindsight would be needed is thinking "what data would I need to create that insight". From this dropping accordingly.
+
+
+## Git Branches
 
 - main  
 
@@ -345,7 +602,7 @@ Was used to transform the csv changes after extraction and to clean the data. Th
 
 This branch was used to visualise the streamlit app once the load process was complete. This was also used to demonstrate the etl pipleine integration when running ```run_app dev``` it would run the streamlit app in parallel displaying the data as required.
 
-### Further discussion
+### Further Discussion
 
 <table>
   <tr>

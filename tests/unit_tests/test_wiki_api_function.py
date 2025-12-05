@@ -36,6 +36,6 @@ def test_get_wikipedia_image_failure_status():
     mock_response.status_code = 404
 
     with patch("requests.get", return_value=mock_response):
-        result = get_wikipedia_image("Bad Page Name")
+        result = get_wikipedia_image("Cannot find image")
 
     assert result is None
