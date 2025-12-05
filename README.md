@@ -2,8 +2,7 @@
 
 ## About Section
 
-This project combined two datasets into the ETL pipeline. The project aims to combine a boxers data with information about fight results. 
-
+This project builds an end-to-end ETL pipeline that integrates two separate boxing datasets: one containing detailed fighter attributes and another capturing individual fight outcomes. The pipeline cleans, standardizes, and merges these sources into a single, analysis-ready dataset. By combining fighter profiles with their historical results, the project enables richer insights into performance and trend within professional boxing.
 
 ## Index Section
 
